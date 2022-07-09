@@ -13,15 +13,30 @@ import { CommentsController } from './comments/comments.controller';
 import { CommentsService } from './comments/comments.service';
 import { CommentsModule } from './comments/comments.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DatabaseConfigModule } from './config/config.module';
+import { DatabaseConfigService } from './config/config.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-	imports: [TypeOrmModule.forRoot(), UsersModule, BlogsModule, CommentsModule],
+	imports: [
+		ConfigModule.forRoot({
+			cache: true,
+			isGlobal: true,
+		}),
+		TypeOrmModule.forRootAsync({
+			imports: [DatabaseConfigModule],
+			useClass: DatabaseConfigService,
+			inject: [DatabaseConfigService],
+		}),
+		UsersModule,
+		BlogsModule,
+		CommentsModule,
+	],
 	controllers: [
 		AppController,
-		UsersController,
-		BlogsController,
-		CommentsController,
 	],
-	providers: [AppService, UsersService, BlogsService, CommentsService],
+	providers: [
+		AppService,
+	],
 })
-export class AppModule {}
+export class AppModule { }

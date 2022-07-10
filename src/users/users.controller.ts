@@ -23,13 +23,17 @@ export class SignController {
 
 	@Get('in')
 	async SignIn(@Body() signinDto: SignInDto): Promise<boolean> {
-		this.usersService.SignIn(signinDto);
-		return false;
+		return this.usersService.SignIn(signinDto);
 	}
 
 	@Post('up')
 	async SignUp(@Body() signupDto: SignUpDto): Promise<boolean> {
-		this.usersService.SignUp(signupDto);
-		return false;
+		const result = await this.usersService.SignUp(signupDto);
+
+		if(result) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

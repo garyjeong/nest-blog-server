@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UsersRepository } from '../database/repositories/users.repository';
 import { Users } from '../database/entities/users.entity';
 import { SignInDto, SignUpDto } from 'src/dto/sign.dto';
-import Time from 'utils/time.util';
+import Time from '../utils/time.util';
 
 @Injectable()
 export class UsersService {
@@ -15,19 +15,38 @@ export class UsersService {
     /**
      * 로그인
      */
-     SignIn(signinDto: SignInDto) { 
-        const email = this.usersRepository.findAndCount({ email: signinDto.email });
-        return 'a';
+     async SignIn(signinDto: SignInDto): Promise<boolean> { 
+        const data = await this.usersRepository.findOneOrFail({ email: signinDto.email });
+
+        if(data) {
+            if(data.password === signinDto.password) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
      * 계정 생성
      */
-    SignUp(signupDto: SignUpDto) {
-        const time = new Time();
-        signupDto.uid = time.makeId();
+    async SignUp(signupDto: SignUpDto): Promise<boolean> {
+        try {
+            const isExist = await this.usersRepository.findOne({ where: {email: signupDto.email} });
 
-        return this.usersRepository.save(signupDto);
+            if(!isExist) {
+                const time = new Time();
+                signupDto.uid = time.makeId();
+                await this.usersRepository.save(signupDto);
+                return true;
+            } else {
+                throw new Error();
+            }
+        } catch(e) {
+            return false;
+        }
     }
 
     /**

@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersRepository } from '../database/repositories/users.repository';
 import { Users } from '../database/entities/users.entity';
+import { SignInDto, SignUpDto } from 'src/dto/sign.dto';
+import Time from 'utils/time.util';
 
 @Injectable()
 export class UsersService {
@@ -11,16 +13,22 @@ export class UsersService {
     ) { }
 
     /**
-     * 계정 생성
+     * 로그인
      */
-    SignUp(email: string, password: string) {
-        return this.usersRepository.create({});
+     SignIn(signinDto: SignInDto) { 
+        const email = this.usersRepository.findAndCount({ email: signinDto.email });
+        return 'a';
     }
 
     /**
-     * 로그인
+     * 계정 생성
      */
-    SignIn() { }
+    SignUp(signupDto: SignUpDto) {
+        const time = new Time();
+        signupDto.uid = time.makeId();
+
+        return this.usersRepository.save(signupDto);
+    }
 
     /**
      * 사용자 정보 가져오기
